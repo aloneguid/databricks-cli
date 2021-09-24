@@ -1,0 +1,29 @@
+name: Release
+
+env:
+  v: '1.0.0'
+  av: '1.0.0'
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      name: Check-out source code
+      with:
+        submodules: true
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Install dependencies
+      run: dotnet restore src/cli.sln
+    - name: Build
+      run: dotnet publish -c release -o pub -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true -p:PublishTrimmed=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
