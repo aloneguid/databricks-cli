@@ -12,9 +12,20 @@ namespace Databricks.Sql.Cli
    public class QuerySetings : CommandSettings
    {
       [Description("output format, can be TABLE (default) or JSON")]
-      [CommandOption("-f|--format <FORMAT>")]
+      [CommandOption("-f|--format <format>")]
       [DefaultValue("TABLE")]
       public string Format { get; set; }
+   }
+
+   public class TakeoverSettings : QuerySetings
+   {
+      [CommandArgument(0, "<query-id>")]
+      [Description("query id")]
+      public string QueryId { get; set; }
+
+      [CommandArgument(1, "<new-owner>")]
+      [Description("new owner email")]
+      public string NewOwner { get; set; }
    }
 
    public class ListQueriesCommand : AsyncCommand<QuerySetings>
@@ -38,6 +49,16 @@ namespace Databricks.Sql.Cli
             }
             AnsiConsole.Render(table);
          }
+
+         return 0;
+      }
+   }
+
+   public class TransferOwnershipCommand : AsyncCommand<TakeoverSettings>
+   {
+      public override async Task<int> ExecuteAsync(CommandContext context, TakeoverSettings settings)
+      {
+         await Globals.Dbc.TransferQueryOwnership(settings.QueryId, settings.NewOwner);
 
          return 0;
       }

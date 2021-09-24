@@ -6,6 +6,8 @@ namespace Databricks.Sql.Cli
 {
    static class Globals
    {
+      private const string HostEnvVar = "DATABRICKS_HOST";
+      private const string TokenEnvVar = "DATABRICKS_TOKEN";
       private static IDatabricksClient _dbc = null;
 
       public static IDatabricksClient Dbc
@@ -14,8 +16,14 @@ namespace Databricks.Sql.Cli
          {
             if(_dbc == null)
             {
-               string host = Environment.GetEnvironmentVariable("DATABRICKS_HOST");
-               string token = Environment.GetEnvironmentVariable("DATABRICKS_TOKEN");
+               string host = Environment.GetEnvironmentVariable(HostEnvVar);
+               string token = Environment.GetEnvironmentVariable(TokenEnvVar);
+
+               if(string.IsNullOrEmpty(host) || string.IsNullOrEmpty(token))
+               {
+                  throw new ArgumentException($"{HostEnvVar} or {TokenEnvVar} variable is not set.");
+               }   
+
                _dbc = (IDatabricksClient)Files.Of.DatabricksDbfs(new Uri(host), token);
             }
 

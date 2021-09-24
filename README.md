@@ -1,13 +1,5 @@
 # Databricks SQL CLI (Experimental)
 
-## List Queries
+To use, first set `DATABRICKS_HOST` and `DATABRICKS_TOKEN` environment variables to your selected host.
 
-```bash
-dbc qls
-```
-
-## Fetch Query
-
-```bash
-dbc qcat <query-id>
-```
+Commands are self-explanatory and can be listed by launching `dbsql` without parameters.

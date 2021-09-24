@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Databricks.Sql.Cli;
-using Spectre.Console;
 using Spectre.Console.Cli;
-using Stowage;
-using Stowage.Impl.Databricks;
 
 namespace dbc
 {
@@ -19,7 +13,13 @@ namespace dbc
          {
             config.AddBranch<QuerySetings>("query", query =>
             {
-               query.AddCommand<ListQueriesCommand>("list").WithDescription("lists all queries");
+               query
+                  .AddCommand<ListQueriesCommand>("list")
+                  .WithDescription("lists all queries");
+
+               query
+                  .AddCommand<TransferOwnershipCommand>("takeover")
+                  .WithDescription("transfers ownership of a query to another person");
             });
          });
 
