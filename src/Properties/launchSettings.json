@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "LOCAL": {
+      "commandName": "Project",
+      "commandLineArgs": "query list",
+      "environmentVariables": {
+        "DATABRICKS_HOST": "https://adb-8250406776365692.12.azuredatabricks.net/",
+        "DATABRICKS_TOKEN": "dapi442bac348d27862937ca82ce8daf6c88"
+      }
+    }
+  }
+}
