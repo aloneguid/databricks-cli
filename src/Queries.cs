@@ -45,7 +45,7 @@ namespace Databricks.Sql.Cli
             table.AddColumns("Id", "Name");
             foreach(SqlQueryBase q in queries)
             {
-               table.AddRow(q.Id, q.Name);
+               table.AddRow(q.Id.EscapeMarkup(), q.Name.EscapeMarkup());
             }
             AnsiConsole.Render(table);
          }
