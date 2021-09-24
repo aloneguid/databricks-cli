@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  v: '1.0.0'
+  v: '1.0.1'
   av: '1.0.0'
 
 on:
@@ -31,10 +31,13 @@ jobs:
     - name: Linux
       run: dotnet publish -c release -o pub/linux -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
       working-directory: ./src
+    - run: mkdir -p out
+    - run: zip dbsql-windows-x64.zip src/pub/win/dbsql.exe
+    - run: zip dbsql-linux-x64.zip src/pub/linux/dbsql
     - name: Release
       uses: softprops/action-gh-release@v1
       if: github.ref == 'refs/heads/master'
       with:
          tag_name: ${{ env.v }}
          name: ${{ env.v }}
-         files: src/pub/**
+         files: "*.zip"
