@@ -28,3 +28,6 @@ jobs:
     - name: Windows .exe
       run: dotnet publish -c release -o pub -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
       working-directory: ./src
+    - name: Linux
+      run: dotnet publish -c release -o pub -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+      working-directory: ./src
