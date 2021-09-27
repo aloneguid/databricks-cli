@@ -29,12 +29,14 @@ jobs:
     - name: Windows .exe
       run: dotnet publish -c release -o pub/win -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
       working-directory: ./src
-    - run: zip -9 -j dbsql-windows-x64.zip src/pub/win/dbsql.exe
+    - run: zip -9 -j dbx-windows-x64.zip src/pub/win/dbx.exe
 
     - name: Linux
       run: dotnet publish -c release -o pub/linux -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
       working-directory: ./src
-    - run: zip -9 -j dbsql-linux-x64.zip src/pub/linux/dbsql
+    - run: zip -9 -j dbx-linux-x64.zip src/pub/linux/dbx
+    - run: mkdir -p src/dev/usr/local/bin
+    - run: cp src/pub/linux/dbx src/deb/usr/local/bin/
 
     - name: Release
       uses: softprops/action-gh-release@v1

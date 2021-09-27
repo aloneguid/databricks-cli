@@ -9,15 +9,8 @@ using Stowage.Impl.Databricks;
 
 namespace Databricks.Sql.Cli
 {
-   public class QuerySetings : CommandSettings
-   {
-      [Description("output format, can be TABLE (default) or JSON")]
-      [CommandOption("-f|--format <format>")]
-      [DefaultValue("TABLE")]
-      public string Format { get; set; }
-   }
 
-   public class TakeoverSettings : QuerySetings
+   public class TakeoverSettings : BaseSettings
    {
       [CommandArgument(0, "<query-id>")]
       [Description("query id")]
@@ -28,9 +21,9 @@ namespace Databricks.Sql.Cli
       public string NewOwner { get; set; }
    }
 
-   public class ListQueriesCommand : AsyncCommand<QuerySetings>
+   public class ListQueriesCommand : AsyncCommand<BaseSettings>
    {
-      public override async Task<int> ExecuteAsync(CommandContext context, QuerySetings settings)
+      public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
       {
          IReadOnlyCollection<SqlQueryBase> queries = await Globals.Dbc.ListSqlQueries();
 
