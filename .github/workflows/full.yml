@@ -35,8 +35,10 @@ jobs:
       run: dotnet publish -c release -o pub/linux -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
       working-directory: ./src
     - run: zip -9 -j dbx-linux-x64.zip src/pub/linux/dbx
-    - run: mkdir -p src/dev/usr/local/bin
+    - run: mkdir -p src/deb/usr/local/bin
     - run: cp src/pub/linux/dbx src/deb/usr/local/bin/
+    # - run: envsubst < src/deb/DEBIAN/control
+    - run: dpkg-deb --build --root-owner-group src/dev
 
     - name: Release
       uses: softprops/action-gh-release@v1
