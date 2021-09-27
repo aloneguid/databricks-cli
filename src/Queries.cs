@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Databricks.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Stowage.Impl.Databricks;
 
-namespace Databricks.Sql.Cli
+namespace Databricks.Cli
 {
 
    public class TakeoverSettings : BaseSettings
@@ -25,7 +26,7 @@ namespace Databricks.Sql.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
       {
-         IReadOnlyCollection<SqlQueryBase> queries = await Globals.Dbc.ListSqlQueries();
+         IReadOnlyCollection<SqlQueryBase> queries = await settings.Dbc.ListSqlQueries();
 
          if(settings.Format == "JSON")
          {
@@ -34,11 +35,10 @@ namespace Databricks.Sql.Cli
          }
          else
          {
-            var table = new Table();
-            table.AddColumns("Id", "Name");
+            Table table = Ansi.NewTable("Id", "Name");
             foreach(SqlQueryBase q in queries)
             {
-               table.AddRow(q.Id.EscapeMarkup(), q.Name.EscapeMarkup());
+               table.AddRow("[grey]" + q.Id.EscapeMarkup() + "[/]", q.Name.EscapeMarkup());
             }
             AnsiConsole.Render(table);
          }
@@ -51,7 +51,7 @@ namespace Databricks.Sql.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, TakeoverSettings settings)
       {
-         await Globals.Dbc.TransferQueryOwnership(settings.QueryId, settings.NewOwner);
+         await settings.Dbc.TransferQueryOwnership(settings.QueryId, settings.NewOwner);
 
          return 0;
       }

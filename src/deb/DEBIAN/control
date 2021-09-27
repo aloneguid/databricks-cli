@@ -1,5 +1,0 @@
-Package: dbx 
-Version: 1.0
-Architecture: amd64 
-Maintainer: Aloneguid <aloneguid@outlook.com>
-Description: Extended Databricks CLI.

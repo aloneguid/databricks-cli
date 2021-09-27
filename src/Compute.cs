@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Databricks.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Stowage.Impl.Databricks;
 
-namespace Databricks.Sql.Cli
+namespace Databricks.Cli
 {
    public class ClusterSettings : BaseSettings
    {
@@ -22,20 +23,23 @@ namespace Databricks.Sql.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
       {
-         IReadOnlyCollection<ClusterInfo> queries = await Globals.Dbc.ListAllClusters();
+         IReadOnlyCollection<ClusterInfo> clusters = await settings.Dbc.ListAllClusters();
 
          if(settings.Format == "JSON")
          {
-            string json = JsonSerializer.Serialize(queries);
+            string json = JsonSerializer.Serialize(clusters);
             Console.WriteLine(json);
          }
          else
          {
-            var table = new Table();
-            table.AddColumns("Id", "Name");
-            foreach(ClusterInfo q in queries)
+            Table table = Ansi.NewTable("Id", "Name", "Source", "State");
+            foreach(ClusterInfo c in clusters)
             {
-               table.AddRow(q.Id.EscapeMarkup(), q.Name.EscapeMarkup());
+               table.AddRow(
+                  "[grey]" + c.Id.EscapeMarkup() + "[/]",
+                  c.Name.EscapeMarkup(),
+                  "[grey]" + c.Source + "[/]",
+                  c.State == "RUNNING" ? "[green]RUNNING[/]" : c.State);
             }
             AnsiConsole.Render(table);
          }
@@ -49,7 +53,7 @@ namespace Databricks.Sql.Cli
       public override async Task<int> ExecuteAsync(CommandContext context, ClusterSettings settings)
       {
          AnsiConsole.Markup($"Looking for cluster having [bold yellow]{settings.IdOrName}[/] in it's id or name... ");
-         var clusters = (await Globals.Dbc.ListAllClusters())
+         var clusters = (await settings.Dbc.ListAllClusters())
             .Where(c =>
                c.Id.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase) ||
                c.Name.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase))
@@ -71,7 +75,7 @@ namespace Databricks.Sql.Cli
          if(!cluster.IsRunning)
          {
             AnsiConsole.Markup($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");
-            await Globals.Dbc.StartCluster(cluster.Id);
+            await settings.Dbc.StartCluster(cluster.Id);
          }
 
          return 0;
@@ -83,7 +87,7 @@ namespace Databricks.Sql.Cli
       public override async Task<int> ExecuteAsync(CommandContext context, ClusterSettings settings)
       {
          AnsiConsole.Markup($"Looking for cluster having [bold yellow]{settings.IdOrName}[/] in it's id or name... ");
-         var clusters = (await Globals.Dbc.ListAllClusters())
+         var clusters = (await settings.Dbc.ListAllClusters())
             .Where(c =>
                c.Id.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase) ||
                c.Name.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase))
@@ -105,7 +109,7 @@ namespace Databricks.Sql.Cli
          if(cluster.IsRunning)
          {
             AnsiConsole.Markup($"stopping cluster {cluster.Id} [green]{cluster.Name}[/]...");
-            await Globals.Dbc.TerminateCluster(cluster.Id);
+            await settings.Dbc.TerminateCluster(cluster.Id);
          }
 
          return 0;
