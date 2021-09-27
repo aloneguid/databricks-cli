@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Databricks.Sql.Cli;
+using Databricks.Cli;
 using Spectre.Console.Cli;
 
 namespace dbc

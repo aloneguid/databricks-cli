@@ -8,11 +8,19 @@ Although it's written in C# (mostly due to the fact that I already have databric
 
 ## Installation
 
-Download from the **releases** section. Integration with package managers may be coming in future.
+Download from the **releases** section i.e. (replace version)
+
+```bash
+wget https://github.com/aloneguid/databricks-cli/releases/download/1.1.2/dbx-linux-x64.zip
+unzip dbx-linux-x64.zip
+./dbx ...
+```
+
+
 
 ## Using
 
-First, set `DATABRICKS_HOST` and `DATABRICKS_TOKEN` environment variables to your selected host. Those are standard variables that standard CLI requires.
+First, set `DATABRICKS_HOST` and `DATABRICKS_TOKEN` environment variables to your selected host. Those are standard variables that standard CLI requires. Optionally, you can 
 
 Commands are self-explanatory and can be listed by launching `dbx` without parameters. Run appropriate executable (`dbx` on Linux or `dbx.exe` on Windows) .
 
@@ -21,7 +29,7 @@ Commands are self-explanatory and can be listed by launching `dbx` without param
 #### List
 
 ```bash
-dbx queries list
+dbx query list
 ```
 
 returns
@@ -41,3 +49,21 @@ dbx query takeover 1 me@domain.com
 ```
 
 Takes over an ownership from current owner to `me@domain.com` for query `1` (raw id). This is useful when a person is not available and query needs to be edited/changed.
+
+### Managing Clusters
+
+#### List
+
+```bas
+dbx cluster list
+```
+
+#### Start/Stop
+
+You can start/stop clusters by passing their id's or name's substring:
+
+```bash
+dbx cluster start <substring>
+dbx cluster stop <substring>
+```
+
