@@ -38,7 +38,7 @@ jobs:
     - run: mkdir -p src/deb/usr/local/bin
     - run: cp src/pub/linux/dbx src/deb/usr/local/bin/
     # - run: envsubst < src/deb/DEBIAN/control
-    - run: dpkg-deb --build --root-owner-group src/dev
+    - run: dpkg-deb --build --root-owner-group src/deb
 
     - name: Release
       uses: softprops/action-gh-release@v1
