@@ -11,6 +11,8 @@ namespace dbc
          var app = new CommandApp();
          app.Configure(config =>
          {
+            config.PropagateExceptions();
+
             config.AddBranch<BaseSettings>("query", query =>
             {
                query

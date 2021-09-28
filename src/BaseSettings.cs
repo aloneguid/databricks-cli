@@ -18,8 +18,6 @@ namespace Databricks.Cli
       [CommandOption("-p|--profile <profile-name>")]
       public string CliProfile { get; set; }
 
-      private const string HostEnvVar = "DATABRICKS_HOST";
-      private const string TokenEnvVar = "DATABRICKS_TOKEN";
       private IDatabricksClient _dbc = null;
 
       public IDatabricksClient Dbc
