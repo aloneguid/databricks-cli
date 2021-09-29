@@ -39,7 +39,7 @@ namespace Databricks.Cli
                   "[grey]" + c.Id.EscapeMarkup() + "[/]",
                   c.Name.EscapeMarkup(),
                   "[grey]" + c.Source + "[/]",
-                  c.State == "RUNNING" ? "[green]RUNNING[/]" : c.State);
+                  Ansi.Sparkup(c.State));
             }
             AnsiConsole.Render(table);
          }
@@ -52,26 +52,10 @@ namespace Databricks.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, ClusterSettings settings)
       {
-         AnsiConsole.Markup($"Looking for cluster having [bold yellow]{settings.IdOrName}[/] in it's id or name... ");
-         var clusters = (await settings.Dbc.ListAllClusters())
-            .Where(c =>
-               c.Id.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase) ||
-               c.Name.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase))
-            .ToList();
-
-         if(clusters.Count == 0)
-         {
-            AnsiConsole.MarkupLine("[red]none.[/]");
+         ClusterInfo cluster = await Ansi.FindCluster(settings.Dbc, settings.IdOrName);
+         if(cluster == null)
             return 1;
-         }
-         else if(clusters.Count > 1)
-         {
-            AnsiConsole.MarkupLine($"[red]{clusters.Count}[/] matches (need 1)");
-            return 2;
-         }
 
-         ClusterInfo cluster = clusters.First();
-         AnsiConsole.MarkupLine($"[green]found[/] ({cluster.State})");
          if(!cluster.IsRunning)
          {
             AnsiConsole.Markup($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");

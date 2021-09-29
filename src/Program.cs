@@ -11,7 +11,7 @@ namespace dbc
          var app = new CommandApp();
          app.Configure(config =>
          {
-            config.PropagateExceptions();
+            //config.PropagateExceptions();
 
             config.AddBranch<BaseSettings>("query", query =>
             {
@@ -38,6 +38,25 @@ namespace dbc
                   .AddCommand<StopClusterCommand>("stop")
                   .WithDescription("stop cluster by id or name");
 
+            });
+
+            config.AddBranch<BaseSettings>("job", query =>
+            {
+               query
+                  .AddCommand<ListJobsCommand>("list")
+                  .WithDescription("list all jobs");
+
+               query
+                  .AddCommand<StartJobCommand>("start")
+                  .WithDescription("start a job by id or name");
+
+               query
+                  .AddCommand<StopJobCommand>("stop")
+                  .WithDescription("stop a job by id or name");
+
+               query
+                  .AddCommand<UpsertJobCommand>("upsert")
+                  .WithDescription("create or update job given it's JSON definition");
             });
          });
 
