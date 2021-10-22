@@ -20,7 +20,7 @@ unzip dbx-linux-x64.zip
 
 ## Using
 
-First, set `DATABRICKS_HOST` and `DATABRICKS_TOKEN` environment variables to your selected host. Those are standard variables that standard CLI requires. Optionally, you can 
+First, set `DATABRICKS_HOST` and `DATABRICKS_TOKEN` environment variables to your selected host. Those are standard variables that standard CLI requires. Optionally, if you have already installed the official databricks CLI, this tool will just read your preconfigured credentials.
 
 Commands are self-explanatory and can be listed by launching `dbx` without parameters. Run appropriate executable (`dbx` on Linux or `dbx.exe` on Windows) .
 
@@ -60,10 +60,35 @@ dbx cluster list
 
 #### Start/Stop
 
-You can start/stop clusters by passing their id's or name's substring:
+You can start/stop clusters by passing their id's or name's substring unlike official tooling that only allows IDs:
 
 ```bash
 dbx cluster start <substring>
 dbx cluster stop <substring>
+```
+
+## Managing Jobs
+
+### List
+
+```bash
+dbx job list
+```
+
+### Start/Stop
+
+You can start/stop jobs by passing their id's or name's substring unlike official tooling that only allows IDs:
+
+```bash
+dbx job start <substring>
+dbx job stop <substring>
+```
+
+### Upserting a Job
+
+This allows to create or update a job by specifying job json file. It will try to find the job by name specified in the json file and update it, otherwise a new job is created. Official tooling requires you to know job id beforehand, check if it exists first, get the id, and then update. This is hairy and overcomplicated.
+
+```bash
+dbx job upsert <json file path>
 ```
 
