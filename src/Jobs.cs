@@ -40,8 +40,9 @@ namespace Databricks.Cli
                   j.Name.EscapeMarkup(),
                   Ansi.Sparkup(lfState),
                   Ansi.Sparkup(rState),
-                  j.ScheduleDisplay.EscapeMarkup());
+                  Ansi.Sparkup(j.ScheduleDisplay));
             }
+
             AnsiConsole.Render(table);
          }
 
