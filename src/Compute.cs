@@ -58,7 +58,7 @@ namespace Databricks.Cli
 
          if(!cluster.IsRunning)
          {
-            AnsiConsole.Markup($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");
+            AnsiConsole.MarkupLine($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");
             await settings.Dbc.StartCluster(cluster.Id);
          }
 
@@ -92,7 +92,7 @@ namespace Databricks.Cli
          AnsiConsole.MarkupLine($"[green]found[/] ({cluster.State})");
          if(cluster.IsRunning)
          {
-            AnsiConsole.Markup($"stopping cluster {cluster.Id} [green]{cluster.Name}[/]...");
+            AnsiConsole.MarkupLine($"stopping cluster {cluster.Id} [green]{cluster.Name}[/]...");
             await settings.Dbc.TerminateCluster(cluster.Id);
          }
 
