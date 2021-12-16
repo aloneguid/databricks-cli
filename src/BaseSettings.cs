@@ -18,6 +18,9 @@ namespace Databricks.Cli
       [CommandOption("-p|--profile <profile-name>")]
       public string CliProfile { get; set; }
 
+      [CommandOption("-v|--verbose")]
+      public bool Verbose { get; set; }
+
       private IDatabricksClient _dbc = null;
 
       public IDatabricksClient Dbc

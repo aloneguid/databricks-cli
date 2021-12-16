@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  v: '1.2.4'
+  v: '1.2.5'
   av: '1.0.0'
 
 on:
@@ -27,19 +27,22 @@ jobs:
       run: dotnet restore src/cli.sln
 
     - name: Windows .exe
-      run: dotnet publish -c release -o pub/win -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+      run: |
+         dotnet publish -c release -o pub/win -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+         zip -9 -j dbx-windows-x64.zip src/pub/win/dbx.exe
       working-directory: ./src
-    - run: zip -9 -j dbx-windows-x64.zip src/pub/win/dbx.exe
 
     - name: Linux
-      run: dotnet publish -c release -o pub/linux -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+      run: |
+         dotnet publish -c release -o pub/linux -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+         zip -9 -j dbx-linux-x64.zip src/pub/linux/dbx
       working-directory: ./src
-    - run: zip -9 -j dbx-linux-x64.zip src/pub/linux/dbx
 
     - name: OSX
-      run: dotnet publish -c release -o pub/osx -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+      run: |
+         dotnet publish -c release -o pub/osx -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -p:PublishReadyToRun=true -p:Version=${{ env.v }} -p:FileVersion=${{ env.v }} -p:AssemblyVersion=${{ env.av }}
+         zip -9 -j dbx-osx-x64.zip src/pub/osx/dbx
       working-directory: ./src
-    - run: zip -9 -j dbx-osx-x64.zip src/pub/osx/dbx
 
     - name: Release
       uses: softprops/action-gh-release@v1
