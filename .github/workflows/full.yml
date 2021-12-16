@@ -50,4 +50,4 @@ jobs:
       with:
          tag_name: ${{ env.v }}
          name: ${{ env.v }}
-         files: "*.zip"
+         files: "src/*.zip"
