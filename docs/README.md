@@ -92,3 +92,6 @@ This allows to create or update a job by specifying job json file. It will try t
 dbx job upsert <json file path>
 ```
 
+## Executing Code Remotely
+
+`dbx exec -h`

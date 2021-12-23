@@ -60,6 +60,21 @@ namespace dbc
                   .AddCommand<UpsertJobCommand>("upsert")
                   .WithDescription("create or update job given it's JSON definition");
             });
+
+            config.AddBranch<BaseSettings>("exec", query =>
+            {
+               query
+                  .AddCommand<ExecPythonCommand>("python")
+                  .WithDescription("execute Python code");
+
+               query
+                  .AddCommand<ExecScalaCommand>("scala")
+                  .WithDescription("execute Scala code");
+
+               query
+                  .AddCommand<ExecSqlCommand>("sql")
+                  .WithDescription("execute SQL code");
+            });
          });
 
          return await app.RunAsync(args);
