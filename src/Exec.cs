@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -36,6 +41,64 @@ namespace Databricks.Cli
 
    static class CommonExec
    {
+      class JResult
+      {
+         [JsonPropertyName("resultType")]
+         public string Type { get; set; }
+      }
+
+      class JSchemaElement
+      {
+         [JsonPropertyName("name")]
+         public string Name { get; set; }
+
+         [JsonPropertyName("type")]
+         public string Type { get; set; }
+      }
+
+      class JTableResult : JResult
+      {
+         [JsonPropertyName("schema")]
+         public JSchemaElement[] Schema { get; set; }
+
+         [JsonPropertyName("data")]
+         public object[] Data { get; set; }
+      }
+
+      private static void BestEffortRenderResult(string result)
+      {
+         JResult resultBase = JsonSerializer.Deserialize<JResult>(result);
+         if(resultBase == null)
+            return;
+
+         AnsiConsole.MarkupLine($"result type: [white]{resultBase?.Type}[/]");
+
+         if(resultBase.Type == "table")
+         {
+            JTableResult tableResult = JsonSerializer.Deserialize<JTableResult>(result);
+
+            Table table = Ansi.NewTable(tableResult.Schema.Select(e => e.Name).ToArray());
+
+            if(tableResult.Data != null)
+            {
+               foreach(object row in tableResult.Data)
+               {
+                  if(row is JsonElement jRow && jRow.ValueKind == JsonValueKind.Array)
+                  {
+                     string[] rowArray = new string[jRow.GetArrayLength()];
+                     for (int i = 0; i < rowArray.Length; i++)
+                     {
+                        rowArray[i] = jRow[i].ToString().EscapeMarkup();
+                     }
+                     table.AddRow(rowArray.ToArray());
+                  }
+               }
+            }
+
+            AnsiConsole.Write(table);
+         }
+      }
+
       static async Task Exec(string clusterId, Language lang, ExecSettings settings, string code = null)
       {
          if(code == null) code = settings.Code;
@@ -54,8 +117,7 @@ namespace Databricks.Cli
 
          if(!string.IsNullOrEmpty(result))
          {
-            AnsiConsole.MarkupLine("result:");
-            Console.WriteLine(result);
+            BestEffortRenderResult(result);
          }
       }
 
