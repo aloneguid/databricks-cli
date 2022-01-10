@@ -31,6 +31,10 @@ namespace Databricks.Cli
       [Description("do not display query output (hide sensitive data)")]
       public bool NoOutput { get; set; }
 
+      [CommandOption("-d|--dispose")]
+      [Description("stop cluster (dispose) after execution")]
+      public bool Dispose { get; set; }
+
       public override ValidationResult Validate()
       {
          if(string.IsNullOrEmpty(Cluster))
@@ -124,7 +128,8 @@ namespace Databricks.Cli
 
       static async Task Exec(string clusterId, Language lang, ExecSettings settings, string code = null)
       {
-         if(code == null) code = settings.Code;
+         if(code == null)
+            code = settings.Code;
 
          string abs = code.Replace("\r", " ").Replace("\n", " ").Replace("  ", "");
          abs = abs.Substring(0, Math.Min(60, abs.Length)) + "...";
@@ -155,30 +160,39 @@ namespace Databricks.Cli
 
          await Ansi.StartCluster(settings.Dbc, cluster, true);
 
-         if(!string.IsNullOrEmpty(settings.Code))
+         try
          {
-            AnsiConsole.MarkupLine("executing...");
-
-            await Exec(cluster.Id, lang, settings);
-         }
-         else
-         {
-            string dir = settings.Path.Contains(Path.DirectorySeparatorChar)
-               ? Path.GetDirectoryName(settings.Path)
-               : Directory.GetCurrentDirectory();
-
-            string file = Path.GetFileName(settings.Path);
-
-            string[] files = Directory.GetFiles(dir, file);
-
-            foreach(string fileEntry in files)
+            if(!string.IsNullOrEmpty(settings.Code))
             {
-               AnsiConsole.MarkupLine($"executing [white]{Path.GetFileName(fileEntry)}[/] [grey]({fileEntry})[/]...");
+               AnsiConsole.MarkupLine("executing...");
 
-               string code = File.ReadAllText(fileEntry);
-
-               await Exec(cluster.Id, lang, settings, code);
+               await Exec(cluster.Id, lang, settings);
             }
+            else
+            {
+               string dir = settings.Path.Contains(Path.DirectorySeparatorChar)
+                  ? Path.GetDirectoryName(settings.Path)
+                  : Directory.GetCurrentDirectory();
+
+               string file = Path.GetFileName(settings.Path);
+
+               string[] files = Directory.GetFiles(dir, file);
+
+               foreach(string fileEntry in files)
+               {
+                  AnsiConsole.MarkupLine($"executing [white]{Path.GetFileName(fileEntry)}[/] [grey]({fileEntry})[/]...");
+
+                  string code = File.ReadAllText(fileEntry);
+
+                  cluster = await settings.Dbc.LoadCluster(cluster.Id);
+                  await Exec(cluster.Id, lang, settings, code);
+               }
+            }
+         }
+         finally
+         {
+            if(settings.Dispose)
+               await Ansi.StopCluster(settings.Dbc, cluster, false);
          }
 
          return 0;
