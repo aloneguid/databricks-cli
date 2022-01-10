@@ -63,6 +63,36 @@ namespace Databricks.Cli
          return cluster;
       }
 
+      public static async Task StartCluster(IDatabricksClient client, ClusterInfo cluster, bool wait)
+      {
+         if(cluster.State != "RUNNING")
+         {
+            AnsiConsole.MarkupLine($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");
+            await client.StartCluster(cluster.Id);
+         }
+
+         if(wait)
+         {
+            while(true)
+            {
+               await Task.Delay(TimeSpan.FromSeconds(1));
+
+               cluster = await client.LoadCluster(cluster.Id);
+
+               AnsiConsole.Write($".{cluster.State}");
+
+               if(cluster.State == "RUNNING")
+               {
+                  AnsiConsole.WriteLine();
+                  return;
+               }
+
+               if(cluster.State == "TERMINATED")
+                  throw new Exception("could not start cluster");
+            }
+         }
+      }
+
       public static async Task<Job> FindJob(IDatabricksClient client, string substr)
       {
          AnsiConsole.Markup($"Looking for a job having [bold yellow]{substr}[/] in it's id or name... ");

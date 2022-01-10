@@ -27,6 +27,10 @@ namespace Databricks.Cli
       [Description("code filename to execute, basic patterns are supported")]
       public string Path { get; set; }
 
+      [CommandOption("--no-output")]
+      [Description("do not display query output (hide sensitive data)")]
+      public bool NoOutput { get; set; }
+
       public override ValidationResult Validate()
       {
          if(string.IsNullOrEmpty(Cluster))
@@ -65,6 +69,15 @@ namespace Databricks.Cli
          public object[] Data { get; set; }
       }
 
+      class JErrorResult : JResult
+      {
+         [JsonPropertyName("summary")]
+         public string Summary { get; set; }
+
+         [JsonPropertyName("cause")]
+         public string Cause { get; set; }
+      }
+
       private static void BestEffortRenderResult(string result)
       {
          JResult resultBase = JsonSerializer.Deserialize<JResult>(result);
@@ -97,6 +110,16 @@ namespace Databricks.Cli
 
             AnsiConsole.Write(table);
          }
+         else if(resultBase.Type == "error")
+         {
+            JErrorResult errorResult = JsonSerializer.Deserialize<JErrorResult>(result);
+
+            AnsiConsole.MarkupLine(
+               $"[red]summary:[/] {errorResult.Summary.EscapeMarkup()}");
+
+            AnsiConsole.MarkupLine(
+               $"[red]cause:[/] {errorResult.Cause.EscapeMarkup()}");
+         }
       }
 
       static async Task Exec(string clusterId, Language lang, ExecSettings settings, string code = null)
@@ -117,7 +140,10 @@ namespace Databricks.Cli
 
          if(!string.IsNullOrEmpty(result))
          {
-            BestEffortRenderResult(result);
+            if(settings.NoOutput)
+               AnsiConsole.WriteLine("result printing is skipped");
+            else
+               BestEffortRenderResult(result);
          }
       }
 
@@ -126,6 +152,8 @@ namespace Databricks.Cli
          ClusterInfo cluster = await Ansi.FindCluster(settings.Dbc, settings.Cluster);
          if(cluster == null)
             return 1;
+
+         await Ansi.StartCluster(settings.Dbc, cluster, true);
 
          if(!string.IsNullOrEmpty(settings.Code))
          {

@@ -17,6 +17,10 @@ namespace Databricks.Cli
       [CommandArgument(0, "<id-or-name>")]
       [Description("part of cluster id or name, case insensitive")]
       public string IdOrName { get; set; }
+
+      [CommandOption("-w|--wait")]
+      [Description("wait until operation is complete")]
+      public bool Wait { get; set; }
    }
 
    public class ListClustersCommand : AsyncCommand<BaseSettings>
@@ -56,11 +60,7 @@ namespace Databricks.Cli
          if(cluster == null)
             return 1;
 
-         if(!cluster.IsRunning)
-         {
-            AnsiConsole.MarkupLine($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");
-            await settings.Dbc.StartCluster(cluster.Id);
-         }
+         await Ansi.StartCluster(settings.Dbc, cluster, settings.Wait);
 
          return 0;
       }
