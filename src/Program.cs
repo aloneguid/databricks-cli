@@ -26,6 +26,13 @@ namespace dbc
                   .WithDescription("transfers ownership of a query to another person");
             });
 
+            config.AddBranch<BaseSettings>("dash", query =>
+            {
+               query
+                  .AddCommand<ListDashboardsCommand>("list")
+                  .WithDescription("list all dashboards");
+            });
+
             config.AddBranch<BaseSettings>("cluster", query =>
             {
                query

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Databricks.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Stowage.Impl.Databricks;
@@ -51,7 +50,7 @@ namespace Databricks.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, TakeoverSettings settings)
       {
-         await settings.Dbc.TransferQueryOwnership(settings.QueryId, settings.NewOwner);
+         //await settings.Dbc.TransferQueryOwnership(settings.QueryId, settings.NewOwner);
 
          return 0;
       }

@@ -45,4 +45,11 @@ namespace Databricks.Cli
       }
 
    }
+
+   public class BaseFilterSettings : BaseSettings
+   {
+      [Description("apply string filter")]
+      [CommandOption("--filter")]
+      public string Filter { get; set; }
+   }
 }
