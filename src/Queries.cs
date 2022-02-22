@@ -45,14 +45,4 @@ namespace Databricks.Cli
          return 0;
       }
    }
-
-   public class TransferOwnershipCommand : AsyncCommand<TakeoverSettings>
-   {
-      public override async Task<int> ExecuteAsync(CommandContext context, TakeoverSettings settings)
-      {
-         //await settings.Dbc.TransferQueryOwnership(settings.QueryId, settings.NewOwner);
-
-         return 0;
-      }
-   }
 }

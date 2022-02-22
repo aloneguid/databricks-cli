@@ -20,10 +20,6 @@ namespace dbc
                query
                   .AddCommand<ListQueriesCommand>("list")
                   .WithDescription("lists all queries");
-
-               query
-                  .AddCommand<TransferOwnershipCommand>("takeover")
-                  .WithDescription("transfers ownership of a query to another person");
             });
 
             config.AddBranch<BaseSettings>("dash", query =>
@@ -81,6 +77,13 @@ namespace dbc
                query
                   .AddCommand<ExecSqlCommand>("sql")
                   .WithDescription("execute SQL code");
+            });
+
+            config.AddBranch<BaseSettings>("scim", query =>
+            {
+               query
+                  .AddCommand<ScimListUsersCommand>("list-users")
+                  .WithDescription("List users. When exporting to CSV, the group column is exploded.");
             });
          });
 

@@ -38,7 +38,7 @@ namespace Databricks.Cli
          return s.EscapeMarkup();
       }
 
-      public static async Task<ClusterInfo> FindCluster(IDatabricksClient client, string substr)
+      public static async Task<ClusterInfo?> FindCluster(IDatabricksClient client, string substr)
       {
          AnsiConsole.Markup($"Looking for cluster having [bold yellow]{substr}[/] in it's id or name... ");
          var clusters = (await client.ListAllClusters())
@@ -120,7 +120,7 @@ namespace Databricks.Cli
          }
       }
 
-      public static async Task<Job> FindJob(IDatabricksClient client, string substr)
+      public static async Task<Job?> FindJob(IDatabricksClient client, string substr)
       {
          AnsiConsole.Markup($"Looking for a job having [bold yellow]{substr}[/] in it's id or name... ");
          var jobs = (await client.ListAllJobs(false))

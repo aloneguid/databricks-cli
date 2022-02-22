@@ -137,7 +137,7 @@ namespace Databricks.Cli
             return 1;
          }
 
-         Job job = await Ansi.FindJob(settings.Dbc, jobNameObj.ToString());
+         Job? job = await Ansi.FindJob(settings.Dbc, jobNameObj.ToString());
 
          if(job == null)
          {
