@@ -42,7 +42,7 @@ namespace Databricks.Cli
                   "[grey]" + q.Id.EscapeMarkup() + "[/]",
                   q.Version.ToString(),
                   name.EscapeMarkup(),
-                  q.User?.Email?.EscapeMarkup());
+                  q.User.Email.EscapeMarkup());
             }
             AnsiConsole.Write(table);
          }

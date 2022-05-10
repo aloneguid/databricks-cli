@@ -29,15 +29,26 @@ namespace Databricks.Cli
       {
          IReadOnlyCollection<ClusterInfo> clusters = await settings.Dbc.ListAllClusters();
 
+         var orderedClusters = clusters
+            .OrderBy(c => c.Source switch
+            {
+               "UI" => 0,
+               "API" => 1,
+               _ => 2
+            })
+            .ThenBy(c => c.State)
+            .ThenBy(c => c.Name.ToLower())
+            .ToList();
+
          if(settings.Format == "JSON")
          {
-            string json = JsonSerializer.Serialize(clusters);
+            string json = JsonSerializer.Serialize(orderedClusters);
             Console.WriteLine(json);
          }
          else
          {
             Table table = Ansi.NewTable("Id", "Name", "Source", "State");
-            foreach(ClusterInfo c in clusters)
+            foreach(ClusterInfo c in orderedClusters)
             {
                table.AddRow(
                   "[grey]" + c.Id.EscapeMarkup() + "[/]",
