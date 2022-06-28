@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Databricks.Cli;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Stowage.Impl.Databricks;
@@ -27,7 +25,7 @@ namespace Databricks.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
       {
-         IReadOnlyCollection<ClusterInfo> clusters = await settings.Dbc.ListAllClusters();
+         IReadOnlyCollection<ClusterInfo> clusters = await settings.Dbc.LsClusters();
 
          var orderedClusters = clusters
             .OrderBy(c => c.Source switch
@@ -56,24 +54,21 @@ namespace Databricks.Cli
                   "[grey]" + c.Source + "[/]",
                   Ansi.Sparkup(c.State));
             }
-            AnsiConsole.Render(table);
+            AnsiConsole.Write(table);
          }
 
          return 0;
       }
    }
 
-   public class StartClusterCommand : AsyncCommand<ClusterSettings>
+   public class StartClusterCommand : ReadyCommand<ClusterSettings>
    {
-      public override async Task<int> ExecuteAsync(CommandContext context, ClusterSettings settings)
+      protected override async Task Exec(IDatabricksClient dbc, ClusterSettings settings)
       {
-         ClusterInfo cluster = await Ansi.FindCluster(settings.Dbc, settings.IdOrName);
-         if(cluster == null)
-            return 1;
+         ClusterInfo? cluster = await Ansi.FindCluster(dbc, settings.IdOrName);
+         if(cluster == null) return;
 
-         await Ansi.StartCluster(settings.Dbc, cluster, settings.Wait);
-
-         return 0;
+         await Ansi.StartCluster(dbc, cluster, settings.Wait);
       }
    }
 
@@ -82,7 +77,7 @@ namespace Databricks.Cli
       public override async Task<int> ExecuteAsync(CommandContext context, ClusterSettings settings)
       {
          AnsiConsole.Markup($"Looking for cluster having [bold yellow]{settings.IdOrName}[/] in it's id or name... ");
-         var clusters = (await settings.Dbc.ListAllClusters())
+         var clusters = (await settings.Dbc.LsClusters())
             .Where(c =>
                c.Id.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase) ||
                c.Name.Contains(settings.IdOrName, StringComparison.InvariantCultureIgnoreCase))

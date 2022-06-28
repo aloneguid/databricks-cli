@@ -9,7 +9,7 @@ namespace Databricks.Cli
 {
    public class BaseSettings : CommandSettings
    {
-      [Description("output format, can be TABLE (default), JSON or CSV. Not all commands support all formats.")]
+      [Description("output format, can be TABLE (default), JSON or CSV. Not all commands support all formats. To get nicely formatted JSON just use jq, for instance ... | jq . -C")]
       [CommandOption("-f|--format <format>")]
       [DefaultValue("TABLE")]
       public string Format { get; set; }
@@ -23,6 +23,7 @@ namespace Databricks.Cli
 
       private IDatabricksClient _dbc = null;
 
+      [Obsolete]
       public IDatabricksClient Dbc
       {
          get

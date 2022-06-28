@@ -16,7 +16,7 @@ namespace Databricks.Cli
    {
       public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
       {
-         IReadOnlyCollection<Job> jobs = await settings.Dbc.ListAllJobs(true);
+         IReadOnlyCollection<Job> jobs = await settings.Dbc.LsJobs(true);
 
          if(settings.Format == "JSON")
          {
@@ -100,7 +100,7 @@ namespace Databricks.Cli
             return 1;
 
          AnsiConsole.MarkupLine("loading all job details");
-         j = await settings.Dbc.LoadJob(j.Id);
+         j = await settings.Dbc.GetJob(j.Id);
 
          List<Run> runningRuns = j.Runs.Where(r => r.IsRunning).ToList();
          if(runningRuns.Count == 0)
@@ -114,7 +114,7 @@ namespace Databricks.Cli
             foreach(Run run in runningRuns)
             {
                AnsiConsole.Markup($"stopping run [grey]{run.RunId}[/]... ");
-               await settings.Dbc.CancelRun(run.RunId);
+               await settings.Dbc.CancelJobRun(run.RunId);
                AnsiConsole.MarkupLine("[green]ok[/]");
             }
          }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Spectre.Console;
@@ -22,7 +23,7 @@ namespace Databricks.Cli
          if(s == null)
             return "";
 
-         string color = s switch
+         string? color = s switch
          {
             "RUNNING" or "SUCCESS" => "green",
             "FAILED" => "red",
@@ -41,7 +42,7 @@ namespace Databricks.Cli
       public static async Task<ClusterInfo?> FindCluster(IDatabricksClient client, string substr)
       {
          AnsiConsole.Markup($"Looking for cluster having [bold yellow]{substr}[/] in it's id or name... ");
-         var clusters = (await client.ListAllClusters())
+         var clusters = (await client.LsClusters())
             .Where(c =>
                c.Id.Contains(substr, StringComparison.InvariantCultureIgnoreCase) ||
                c.Name.Contains(substr, StringComparison.InvariantCultureIgnoreCase))
@@ -54,7 +55,7 @@ namespace Databricks.Cli
          }
          else if(clusters.Count > 1)
          {
-            AnsiConsole.MarkupLine($"[red]{clusters.Count}[/] matches (need 1)");
+            AnsiConsole.MarkupLine($"[red]{clusters.Count}[/] matches (inconclusive)");
             return null;
          }
 
@@ -65,7 +66,7 @@ namespace Databricks.Cli
 
       public static async Task StartCluster(IDatabricksClient client, ClusterInfo cluster, bool wait)
       {
-         if(cluster.State != "RUNNING")
+         if(cluster.State != "RUNNING" && cluster.State != "PENDING")
          {
             AnsiConsole.MarkupLine($"starting cluster {cluster.Id} [green]{cluster.Name}[/]...");
             await client.StartCluster(cluster.Id);
@@ -123,7 +124,7 @@ namespace Databricks.Cli
       public static async Task<Job?> FindJob(IDatabricksClient client, string substr)
       {
          AnsiConsole.Markup($"Looking for a job having [bold yellow]{substr}[/] in it's id or name... ");
-         var jobs = (await client.ListAllJobs(false))
+         var jobs = (await client.LsJobs(false))
             .Where(j =>
                j.Id.ToString().Contains(substr, StringComparison.InvariantCultureIgnoreCase) ||
                j.Name.Contains(substr, StringComparison.InvariantCultureIgnoreCase))
@@ -143,6 +144,72 @@ namespace Databricks.Cli
          Job job = jobs.First();
          AnsiConsole.MarkupLine($"[green]found[/]");
          return job;
+      }
+
+      public static async Task<IReadOnlyCollection<SqlQuery>> ListQueries(IDatabricksClient dbc, string? rawTags, string? name)
+      {
+         IReadOnlyCollection<SqlQuery>? queries = null;
+
+         await AnsiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+               ProgressTask? task = ctx.AddTask("downloading list...");
+
+               queries = await dbc.LsSqlQueries((current, total) => {
+                  task.MaxValue = total;
+                  task.Value = current;
+                  return Task.CompletedTask;
+               });
+            });
+
+         if(queries == null)
+            return Enumerable.Empty<SqlQuery>().ToList();
+
+         if(!string.IsNullOrEmpty(rawTags))
+         {
+            string[] tags = rawTags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            queries = queries
+               .Where(q => q.Tags != null && tags.All(t => q.Tags.Contains(t, StringComparer.InvariantCultureIgnoreCase)))
+               .ToList();
+         }
+
+         if(!string.IsNullOrEmpty(name))
+            queries = queries.Where(q => q.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+         return queries;
+      }
+
+      public static async Task<IReadOnlyCollection<SqlDashboard>> ListDashboards(IDatabricksClient dbc, string? rawTags, string? name)
+      {
+         IReadOnlyCollection<SqlDashboard>? dashboards = null;
+
+         await AnsiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+               ProgressTask? task = ctx.AddTask("downloading list...");
+
+               dashboards = await dbc.LsSqlDashboards((current, total) => {
+                  task.MaxValue = total;
+                  task.Value = current;
+                  return Task.CompletedTask;
+               });
+            });
+
+         if(dashboards == null)
+            return Enumerable.Empty<SqlDashboard>().ToList();
+
+         if(!string.IsNullOrEmpty(rawTags))
+         {
+            string[] tags = rawTags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            dashboards = dashboards
+               .Where(q => q.Tags != null && tags.All(t => q.Tags.Contains(t, StringComparer.InvariantCultureIgnoreCase)))
+               .ToList();
+         }
+
+         if(!string.IsNullOrEmpty(name))
+            dashboards = dashboards.Where(q => q.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+         return dashboards;
       }
    }
 }

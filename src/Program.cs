@@ -8,6 +8,9 @@ namespace dbc
    {
       static async Task<int> Main(string[] args)
       {
+         // required for emoji to render
+         System.Console.OutputEncoding = System.Text.Encoding.UTF8;
+
          var app = new CommandApp();
          app.Configure(config =>
          {
@@ -20,6 +23,18 @@ namespace dbc
                query
                   .AddCommand<ListQueriesCommand>("list")
                   .WithDescription("lists all queries");
+
+               query
+                  .AddCommand<GetQueryCommand>("get")
+                  .WithDescription("get query details");
+
+               query
+                  .AddCommand<DeleteQueryCommand>("delete")
+                  .WithDescription("delete query or queries");
+
+               query
+                  .AddCommand<BackupQueriesCommand>("backup")
+                  .WithDescription("backup queries to local files");
             });
 
             config.AddBranch<BaseSettings>("dash", query =>
@@ -27,6 +42,10 @@ namespace dbc
                query
                   .AddCommand<ListDashboardsCommand>("list")
                   .WithDescription("list all dashboards");
+
+               query
+                  .AddCommand<BackupDashboardCommand>("backup")
+                  .WithDescription("backup dashboards to local files");
             });
 
             config.AddBranch<BaseSettings>("cluster", query =>

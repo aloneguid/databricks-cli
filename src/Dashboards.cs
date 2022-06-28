@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Databricks.Cli.Settings;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Stowage.Impl.Databricks;
 
 namespace Databricks.Cli
 {
-   public class ListDashboardsCommand : AsyncCommand<BaseFilterSettings>
-   {
-      public override async Task<int> ExecuteAsync(CommandContext context, BaseFilterSettings settings)
-      {
-         IReadOnlyCollection<SqlDashboardBase> dashes = await settings.Dbc.ListSqlDashboards();
 
-         if(!string.IsNullOrEmpty(settings.Filter))
-            dashes = dashes.Where(
-               d => d.Id.Contains(settings.Filter, StringComparison.InvariantCultureIgnoreCase) ||
-               d.Name.Contains(settings.Filter, StringComparison.InvariantCultureIgnoreCase)).ToList();
+   public class ListDashboardsCommand : ReadyCommand<ListSettings>
+   {
+      protected override async Task Exec(IDatabricksClient dbc, ListSettings settings)
+      {
+         IReadOnlyCollection<SqlDashboard> dashes = await Ansi.ListDashboards(dbc, settings.Tag, settings.Name);
 
          if(settings.Format == "JSON")
          {
@@ -27,27 +26,57 @@ namespace Databricks.Cli
          }
          else
          {
-            Table table = Ansi.NewTable("Id", "V", "Name", "By");
-            foreach(SqlDashboardBase q in dashes)
+            Table table = Ansi.NewTable("Id", "Name", "By");
+            foreach(SqlDashboard dash in dashes)
             {
                string name = "";
-               if(q.IsFavourite)
-                  name += "🌟";
-               name += q.Name;
+               if(dash.IsFavourite)
+                  name += Emoji.Known.GlowingStar;
+               name += dash.Name.EscapeMarkup();
 
-               if(q.IsDraft)
-                  name += "📝";
+               if(dash.Tags != null)
+               {
+                  string tj = string.Join(", ", dash.Tags.OrderBy(t => t).Select(t => $"[grey]{t.EscapeMarkup()}[/]"));
+                  name += $"{Environment.NewLine}   {tj}";
+               }
+
+               if(dash.IsDraft)
+                  name += Emoji.Known.Pencil;
 
                table.AddRow(
-                  "[grey]" + q.Id.EscapeMarkup() + "[/]",
-                  q.Version.ToString(),
-                  name.EscapeMarkup(),
-                  q.User.Email.EscapeMarkup());
+                  "[grey]" + dash.Id.EscapeMarkup() + "[/]",
+                  name,
+                  dash.User.Email.EscapeMarkup());
             }
             AnsiConsole.Write(table);
          }
+      }
+   }
 
-         return 0;
+   public class BackupDashboardCommand : ReadyCommand<ListSettings>
+   {
+      protected override async Task Exec(IDatabricksClient dbc, ListSettings settings)
+      {
+         IReadOnlyCollection<SqlDashboard> queries = await Ansi.ListDashboards(dbc, settings.Tag, settings.Name);
+
+         await AnsiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+               ProgressTask? task = ctx.AddTask("backing up...");
+               task.MaxValue = queries.Count;
+               task.Value = 0;
+
+               foreach(SqlDashboard q in queries)
+               {
+                  string safeName = new string(q.Name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c).ToArray());
+
+                  string fileName = Path.Combine(Environment.CurrentDirectory, $"D-{safeName}.json");
+                  string json = await dbc.GetSqlDashboardRaw(q.Id);
+                  await File.WriteAllTextAsync(fileName, json);
+
+                  task.Value += 1;
+               }
+            });
       }
    }
 }

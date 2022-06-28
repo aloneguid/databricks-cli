@@ -10,7 +10,7 @@
 
    <ItemGroup>
       <PackageReference Include="Spectre.Console" Version="0.44.0" />
-      <PackageReference Include="Stowage" Version="1.1.7" />
+      <PackageReference Include="Stowage" Version="1.2.2" />
    </ItemGroup>
 
 </Project>

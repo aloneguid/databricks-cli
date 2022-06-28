@@ -18,13 +18,13 @@ namespace Databricks.Cli
          await AnsiConsole.Status()
             .StartAsync("Downloading users...", async ctx =>
             {
-               users = await settings.Dbc.ScimLsUsers();
+               users = await settings.Dbc.LsScimUsers();
             });
 
          if(users == null)
             return 1;
 
-         AnsiConsole.Markup($"[green]{users.Count}[/] users in total.");
+         AnsiConsole.MarkupLine($"[green]{users.Count}[/] users in total.");
 
 
          if(!string.IsNullOrEmpty(settings.Filter))
